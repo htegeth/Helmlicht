@@ -17,12 +17,14 @@ void BlinkMuster::setBlinkLeft()
         FastLED.clear();
         FastLED.show();
         iPos = blinkStartPosition;
-        tone(TONE_PIN, 150, 200);
-        delay(700);
+        tone(TONE_PIN, 500, 50);
+        delay(100);
+        tone(TONE_PIN, 300, 150);
+        delay(500);
     }
     leds[iPos++].setHue(HUE_ORANGE);
     FastLED.show();
-    delay(100);
+    delay(80);
 }
 
 void BlinkMuster::setBlinkRight()
@@ -30,15 +32,16 @@ void BlinkMuster::setBlinkRight()
     if (iPos >= LED_FRAGMENT || iPos < 0)
     {
         FastLED.clear();
-        FastLED.show();
-        delay(150);
+        FastLED.show();        
         iPos = RIGHT_BEGIN;
-        tone(TONE_PIN, 50, 200);
-        delay(700);
+        tone(TONE_PIN, 500, 50);
+        delay(100);
+        tone(TONE_PIN, 200, 150);
+        delay(500);
     }
     leds[iPos--].setHue(HUE_ORANGE);
     FastLED.show();
-    delay(100);
+    delay(80);
 }
 
 void BlinkMuster::drawComet()
