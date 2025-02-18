@@ -32,8 +32,9 @@ class BlinkMuster
         void drawHollywood();
         void drawFullRed(uint8_t brightness);
 
-        void setBlinkLeft();
-        void setBlinkRight();
+        void setBlinkLeft()  {blinkCommon(true);};
+        void setBlinkRight() {blinkCommon(false);};
+        void blinkCommon(bool isLeft); 
                 
 
 };

@@ -9,37 +9,27 @@ void BlinkMuster::setLeds(CRGB *leds)
     this->leds = leds;
 }
 
-void BlinkMuster::setBlinkLeft()
-{
-    int8_t blinkStartPosition = NUM_LEDS - LED_FRAGMENT;
-    if (iPos < blinkStartPosition || iPos == NUM_LEDS)
-    {
+void BlinkMuster::blinkCommon(bool isLeft) {
+    const int8_t startPos = isLeft ? (NUM_LEDS - LED_FRAGMENT) : RIGHT_BEGIN;
+    const int8_t step = isLeft ? 1 : -1;
+    const int toneFreqDirect = isLeft ? 300 : 200;
+
+    const bool resetNeeded = isLeft 
+        ? (iPos < startPos || iPos == NUM_LEDS)
+        : (iPos >= LED_FRAGMENT || iPos < 0);
+
+    if (resetNeeded) {
         FastLED.clear();
         FastLED.show();
-        iPos = blinkStartPosition;
-        tone(TONE_PIN, 500, 50);
+        iPos = startPos;
+        tone(TONE_PIN, 500, 50); 
         delay(100);
-        tone(TONE_PIN, 300, 150);
+        tone(TONE_PIN, toneFreqDirect, 150);
         delay(500);
     }
-    leds[iPos++].setHue(HUE_ORANGE);
-    FastLED.show();
-    delay(80);
-}
 
-void BlinkMuster::setBlinkRight()
-{
-    if (iPos >= LED_FRAGMENT || iPos < 0)
-    {
-        FastLED.clear();
-        FastLED.show();        
-        iPos = RIGHT_BEGIN;
-        tone(TONE_PIN, 500, 50);
-        delay(100);
-        tone(TONE_PIN, 200, 150);
-        delay(500);
-    }
-    leds[iPos--].setHue(HUE_ORANGE);
+    leds[iPos].setHue(HUE_ORANGE);
+    iPos += step;
     FastLED.show();
     delay(80);
 }

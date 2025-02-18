@@ -4,12 +4,27 @@
 
 #define NUM_LEDS 23
 #define DATA_PIN 4
+#define NUM_COLORS 5
+#define TONE_PIN 0
+#define COLOR_RED CRGB::Red  
+#define COLOR_BLUE CRGB::Blue  
+#define SIREN_SPEED 300  // Geschwindigkeit in ms
+
+#define FLASH_DURATION 80   // Blitzdauer in ms
+#define PAUSE_DURATION 40   // Pause zwischen Blitzen
+#define SIDE_SWITCH_DELAY 3 // Anzahl Blitze pro Seite
+#define SOUND_DURATION SIDE_SWITCH_DELAY * (PAUSE_DURATION + FLASH_DURATION)
 
 
 // array of leds
 CRGB leds[NUM_LEDS];
+bool sirenPhase = false;
+uint8_t activeSide = 0;     // 0 = links, 1 = rechts
+uint8_t flashCount = 0;
+uint32_t lastUpdate = 0;
+bool ledState = false;
 
-#define NUM_COLORS 5
+
 
 int g_Brightness = 255;   
 
@@ -19,6 +34,7 @@ class Drawer{
     private:
     byte marqueeHue = 4;
     int marqueeScroll = 0;
+    uint32_t lastUpdate = 0;
 
 
     public:
@@ -60,6 +76,41 @@ class Drawer{
         }
         
         leds[random(NUM_LEDS)].setColorCode(CRGB::White).maximizeBrightness();                         
+    }
+
+    void policeBlueFlash()
+    {
+        uint32_t now = millis();
+        static uint16_t toneFreq = 780;
+
+        if (now - lastUpdate > (ledState ? PAUSE_DURATION : FLASH_DURATION))
+        {
+            ledState = !ledState;
+
+            if (ledState)
+            {
+                // Aktiviere LEDs der aktuellen Seite
+                for (uint8_t i = 0; i < NUM_LEDS; i++)
+                {
+                    bool isLeftSide = i < NUM_LEDS / 2;
+                    leds[i] = ((activeSide == 0 && isLeftSide) || (activeSide == 1 && !isLeftSide)) ? CRGB::Blue : CRGB::Black;
+                }
+            }
+            else
+            {
+                FastLED.clear();
+                flashCount++;
+
+                if (flashCount >= SIDE_SWITCH_DELAY)
+                { // wechsle Seiten
+                    activeSide = !activeSide;
+                    flashCount = 0;
+                    toneFreq = (toneFreq == 440) ? 780 : 440;
+                }
+                tone(TONE_PIN, toneFreq);
+            }
+            lastUpdate = now;
+        }
     }
 };
 
@@ -103,20 +154,8 @@ void DrawComet()
 
 
 void loop() { 
-  // // Turn the LED on, then pause
-  // leds[0] = CRGB::Red;
-  // FastLED.show();
-  // delay(500);
-  // // Now turn the LED off, then pause
-  // leds[0] = CRGB::Black;
-  // FastLED.show();
-  // delay(500);
 
- //DrawMarqueeMirrored();
-
-
-  drawer.DrawMarqueeMirrored();
+  drawer.policeBlueFlash();  
   delay(50);
-  //FastLED.setBrightness(20);
   FastLED.show();
 }
